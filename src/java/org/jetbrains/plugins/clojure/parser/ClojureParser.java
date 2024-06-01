@@ -263,11 +263,26 @@ public class ClojureParser implements PsiParser, ClojureTokenTypes {
    * Exit: Lexer is pointed immediately after closing }
    */
   private void parseMetadata(PsiBuilder builder) {
-    //todo add expression with metadata
     if (builder.getTokenType() != SHARPUP) internalError(ClojureBundle.message("expected.sharp.cup"));
     PsiBuilder.Marker mark = builder.mark();
     builder.advanceLexer();
-    parseExpression(builder);
+
+    // Parse the metadata map
+    if (builder.getTokenType() == LEFT_CURLY) {
+      parseMap(builder);
+    } else {
+      builder.error(ClojureBundle.message("expected.metadata.map"));
+    }
+
+    // Parse the expression with metadata
+    if (builder.getTokenType() != null) {
+      PsiBuilder.Marker exprMark = builder.mark();
+      parseExpression(builder);
+      exprMark.done(EXPR_WITH_METADATA);
+    } else {
+      builder.error(ClojureBundle.message("expected.expression.after.metadata"));
+    }
+
     mark.done(METADATA);
   }
 
