@@ -146,7 +146,18 @@ public class ClojurePsiUtil {
   }
 
   private static boolean isParameterSymbol(ClSymbol symbol) {
-    //todo implement me!
+    PsiElement element = symbol.getParent();
+    if (element instanceof ClVector) {
+      PsiElement parent = element.getParent();
+      if (parent instanceof ClList) {
+        PsiElement firstChild = parent.getFirstChild();
+        if (firstChild instanceof ClSymbol) {
+          String name = ((ClSymbol) firstChild).getName();
+          return name.equals("fn") || name.equals("defn") || name.equals("defmacro");
+        }
+      }
+    }
+
     return false;
   }
 
