@@ -62,7 +62,38 @@ public class SymbolResolveProcessor extends ResolveProcessor implements NameHint
   }
 
   protected boolean isAccessible(PsiNamedElement namedElement) {
-    //todo implement me
+    // Check if the element is a valid resolve target
+    if (!(namedElement instanceof PsiNameIdentifierOwner)) return false;
+
+    // Check if the element is accessible from the current place in code
+    PsiElement targetElement = ((PsiNameIdentifierOwner) namedElement).getNameIdentifier();
+    if (targetElement == null) return false;
+
+    PsiFile targetFile = targetElement.getContainingFile();
+    PsiFile contextFile = getElement().getContainingFile();
+
+    // Check if files are in the same module/library scope
+    if (!contextFile.getResolveScope().contains(targetFile.getVirtualFile())) {
+      return false;
+    }
+
+    // Check visibility modifiers
+    if (namedElement instanceof PsiModifierListOwner) {
+      PsiModifierList modifierList = ((PsiModifierListOwner) namedElement).getModifierList();
+      if (modifierList != null) {
+        PsiElement contextParent = getElement().getParent();
+        if (modifierList.hasModifierProperty(PsiModifier.PRIVATE) &&
+                !PsiTreeUtil.isAncestor(targetElement, contextParent, true)) {
+          return false;
+        }
+        if (modifierList.hasModifierProperty(PsiModifier.PROTECTED) &&
+                !PsiTreeUtil.isAncestor(targetElement, contextParent, true) &&
+                !InheritanceUtil.isInheritorOrSelf(contextFile, targetFile, true)) {
+          return false;
+        }
+      }
+    }
+
     return true;
   }
 
