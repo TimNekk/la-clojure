@@ -158,8 +158,13 @@ public class ClSyntheticNamespace extends LightElement implements PsiPackage {
       @Nullable
       public String getLocationString() {
         String name = getContainingFile().getName();
-        //todo show namespace
-        return "(in " + name + ")";
+        String namespace = getNamespace();
+
+        if (namespace != null) {
+          return "(in " + namespace + " in " + name + ")";
+        } else {
+          return "(in " + name + ")";
+        }
       }
 
       @Nullable
