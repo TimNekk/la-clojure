@@ -113,6 +113,27 @@ public class ClojureCodeFragment extends ClojureFileImpl implements JavaCodeFrag
   }
 
   public void addImportForClass(PsiClass clazz) {
-    //todo:
+    if (clazz == null) return;
+
+    PsiFile containingFile = clazz.getContainingFile();
+    if (!(containingFile instanceof ClojureFileImpl)) return;
+
+    ClojureFileImpl clojureFile = (ClojureFileImpl) containingFile;
+    String namespace = clojureFile.getNamespace();
+    if (namespace == null) return;
+
+    Project project = getProject();
+    PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
+
+    String importStatement = "(ns " + getNamespace() +
+            " (:require [" + namespace + " :refer [" + clazz.getName() + "]]))\n";
+
+    PsiElement firstChild = getFirstChild();
+    if (firstChild != null) {
+      PsiElement importElement = factory.createStatementFromText(importStatement, this);
+      addBefore(importElement, firstChild);
+    } else {
+      add(factory.createStatementFromText(importStatement, this));
+    }
   }
 }
