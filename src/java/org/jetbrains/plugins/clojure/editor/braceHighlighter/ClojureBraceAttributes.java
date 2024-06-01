@@ -22,7 +22,7 @@ public abstract class ClojureBraceAttributes {
 
   public static TextAttributes getBraceAttributes(int level, Color background) {
     Color braceColor = CLOJURE_BRACE_COLORS[level % CLOJURE_BRACE_COLORS.length];
-    Color adjustedBraceColor = braceColor; // TODO make it preserve the original colors for Darcula: new Color(braceColor.getRGB() ^ background.getRGB() ^ 0xFFFFFF);
+    Color adjustedBraceColor = new Color(braceColor.getRGB() ^ background.getRGB() ^ 0xFFFFFF);
     return new TextAttributes(adjustedBraceColor, null, null, null, 1);
   }
 }
